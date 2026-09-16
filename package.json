@@ -1,0 +1,175 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "display-switch",
+  "title": "Display Switch",
+  "description": "Toggle a display between extended and mirrored in one keystroke, straight from Raycast.",
+  "icon": "icon.png",
+  "author": "lucas",
+  "categories": [
+    "System"
+  ],
+  "keywords": [
+    "display",
+    "monitor",
+    "mirror",
+    "extend",
+    "screen",
+    "external display"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "toggle-mirror",
+      "title": "Toggle Mirror",
+      "description": "Flip between mirrored and extended. Bind this to a global hotkey.",
+      "mode": "no-view",
+      "keywords": [
+        "mirror",
+        "extend",
+        "display",
+        "screen",
+        "toggle"
+      ]
+    },
+    {
+      "name": "mirror",
+      "title": "Mirror Displays",
+      "description": "Mirror every display to the one chosen in preferences. Does nothing if already mirrored.",
+      "mode": "no-view",
+      "keywords": [
+        "mirror",
+        "display",
+        "screen",
+        "present"
+      ]
+    },
+    {
+      "name": "extend",
+      "title": "Extend Displays",
+      "description": "Stop mirroring and put the menu bar back on the preferred main display. Does nothing if already extended.",
+      "mode": "no-view",
+      "keywords": [
+        "extend",
+        "display",
+        "screen",
+        "unmirror"
+      ]
+    },
+    {
+      "name": "swap-main",
+      "title": "Swap Main Display",
+      "description": "Move the menu bar to the other display without changing mirroring.",
+      "mode": "no-view",
+      "keywords": [
+        "main",
+        "primary",
+        "display",
+        "menu bar",
+        "swap"
+      ]
+    },
+    {
+      "name": "displays",
+      "title": "Manage Displays",
+      "description": "List every connected display and set it to mirror, extend, or become the main display.",
+      "mode": "view",
+      "keywords": [
+        "display",
+        "monitor",
+        "screen",
+        "arrangement"
+      ]
+    },
+    {
+      "name": "display-status",
+      "title": "Display Status",
+      "description": "Menu bar item showing whether displays are mirrored or extended, with one-click switching.",
+      "mode": "menu-bar",
+      "interval": "1m",
+      "keywords": [
+        "display",
+        "mirror",
+        "menu bar"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "mirrorOptimizeFor",
+      "type": "dropdown",
+      "required": false,
+      "title": "Mirror Optimized For",
+      "description": "Which display the others copy when mirroring. It also sets the resolution used while mirrored. External keeps the big screen sharp; Built-in behaves like macOS's ⌘F1 shortcut.",
+      "default": "external",
+      "data": [
+        {
+          "title": "External display",
+          "value": "external"
+        },
+        {
+          "title": "Built-in display",
+          "value": "builtin"
+        },
+        {
+          "title": "Whichever is main now",
+          "value": "main"
+        }
+      ]
+    },
+    {
+      "name": "mainWhenExtended",
+      "type": "dropdown",
+      "required": false,
+      "title": "Main Display When Extended",
+      "description": "Where the menu bar goes after Extend Displays. macOS usually restores it, but not always after sleep or replugging.",
+      "default": "external",
+      "data": [
+        {
+          "title": "External display",
+          "value": "external"
+        },
+        {
+          "title": "Built-in display",
+          "value": "builtin"
+        },
+        {
+          "title": "Leave as macOS restores",
+          "value": "keep"
+        }
+      ]
+    },
+    {
+      "name": "showHUD",
+      "type": "checkbox",
+      "required": false,
+      "title": "Feedback",
+      "label": "Show a HUD after switching",
+      "description": "Show a short on-screen line describing the resulting state.",
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.0",
+    "@raycast/utils": "^2.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.6.0",
+    "prettier": "^3.9.5",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "clean": "rm -rf dist compiled_raycast_swift raycast-env.d.ts swift/.build swift/.swiftpm swift/.raycast-swift-build",
+    "prepublishOnly": "echo \"\\n\\nThis is a Raycast extension, not an npm package. Use 'npm run publish'.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

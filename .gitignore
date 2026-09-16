@@ -1,0 +1,8 @@
+node_modules/
+dist/
+raycast-env.d.ts
+compiled_raycast_swift/
+swift/.build/
+swift/.swiftpm/
+swift/.raycast-swift-build/
+.DS_Store
