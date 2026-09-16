@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
 import { showFailureToast, usePromise } from "@raycast/utils";
+import { markIntendedMirror } from "./lib/actions";
 import {
   DisplayInfo,
   describeMode,
@@ -38,7 +39,13 @@ export default function Command() {
           display={d}
           all={displays}
           source={source}
-          onMirror={() => source && run(`Mirroring ${d.name} to ${source.name}…`, () => setMirror(d.id, source.id))}
+          onMirror={() =>
+            source &&
+            run(`Mirroring ${d.name} to ${source.name}…`, async () => {
+              await setMirror(d.id, source.id);
+              await markIntendedMirror(true);
+            })
+          }
           onUnmirror={() => run(`Extending ${d.name}…`, () => unmirror(d.id))}
           onMakeMain={() => run(`Making ${d.name} the main display…`, () => setMainDisplay(d.id))}
           onRefresh={revalidate}

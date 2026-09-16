@@ -1,10 +1,17 @@
-import { Icon, MenuBarExtra, launchCommand, LaunchType, showHUD } from "@raycast/api";
+import { Color, Icon, MenuBarExtra, launchCommand, LaunchType, showHUD } from "@raycast/api";
 import { showFailureToast, usePromise } from "@raycast/utils";
-import { extendDisplays, mirrorDisplays, swapMainDisplay } from "./lib/actions";
+import { autoExtendIfNeeded, extendDisplays, mirrorDisplays, swapMainDisplay } from "./lib/actions";
 import { describeMode, isMirrored, listDisplays } from "./lib/display";
 
+/** Read state, and on background refresh undo mirroring macOS turned on by itself (if the preference is on). */
+async function loadState() {
+  const displays = await listDisplays();
+  const undone = await autoExtendIfNeeded(displays);
+  return undone ? listDisplays() : displays;
+}
+
 export default function Command() {
-  const { data, isLoading, revalidate } = usePromise(listDisplays);
+  const { data, isLoading, revalidate } = usePromise(loadState);
   const displays = data ?? [];
   const mirrored = isMirrored(displays);
   const single = displays.length < 2;
@@ -23,7 +30,11 @@ export default function Command() {
   const state = single ? "Single display" : mirrored ? "Mirrored" : `Extended · ${main?.name ?? ""} is main`;
 
   return (
-    <MenuBarExtra isLoading={isLoading} icon={mirrored ? Icon.Duplicate : Icon.Monitor} tooltip={state}>
+    <MenuBarExtra
+      isLoading={isLoading}
+      icon={{ source: mirrored ? "mirrored.svg" : "extended.svg", tintColor: Color.PrimaryText }}
+      tooltip={state}
+    >
       <MenuBarExtra.Section title={state}>
         <MenuBarExtra.Item
           title="Mirror Displays"

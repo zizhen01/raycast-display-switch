@@ -149,6 +149,33 @@
       "label": "Show a HUD after switching",
       "description": "Show a short on-screen line describing the resulting state.",
       "default": true
+    },
+    {
+      "name": "audioFollowsMain",
+      "type": "checkbox",
+      "required": false,
+      "title": "Audio",
+      "label": "Audio output follows the main display",
+      "description": "When Swap Main Display moves the menu bar, also route sound to that display's speakers (or the built-in speakers).",
+      "default": false
+    },
+    {
+      "name": "dimBuiltinWhileMirrored",
+      "type": "checkbox",
+      "required": false,
+      "title": "Brightness",
+      "label": "Dim the built-in display while mirrored",
+      "description": "Mirror Displays turns the built-in display's brightness down; Extend Displays restores it. Useful when watching the big screen.",
+      "default": false
+    },
+    {
+      "name": "autoExtend",
+      "type": "checkbox",
+      "required": false,
+      "title": "Auto-Extend",
+      "label": "Undo mirroring that macOS turns on by itself",
+      "description": "Display Status checks about once a minute (needs Background Refresh on that command). If displays are mirrored and this extension did not do it, it extends them. Mirroring set through ⌘F1 or System Settings will be undone too.",
+      "default": false
     }
   ],
   "dependencies": {

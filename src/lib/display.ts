@@ -6,6 +6,10 @@ import {
   unmirror as swiftUnmirror,
   unmirrorAll as swiftUnmirrorAll,
   setMainDisplay as swiftSetMainDisplay,
+  listAudioOutputs as swiftListAudioOutputs,
+  setDefaultAudioOutput as swiftSetDefaultAudioOutput,
+  getBrightness as swiftGetBrightness,
+  setBrightness as swiftSetBrightness,
 } from "swift:../../swift";
 
 export interface DisplayInfo {
@@ -34,6 +38,16 @@ export interface Preferences {
   mirrorOptimizeFor: DisplayChoice;
   mainWhenExtended: MainChoice;
   showHUD: boolean;
+  audioFollowsMain: boolean;
+  dimBuiltinWhileMirrored: boolean;
+  autoExtend: boolean;
+}
+
+export interface AudioOutput {
+  id: number;
+  name: string;
+  transport: string;
+  isDefault: boolean;
 }
 
 export const listDisplays = () => swiftListDisplays() as Promise<DisplayInfo[]>;
@@ -42,6 +56,21 @@ export const mirrorAll = (source: number) => swiftMirrorAll(source) as Promise<v
 export const unmirror = (target: number) => swiftUnmirror(target) as Promise<void>;
 export const unmirrorAll = () => swiftUnmirrorAll() as Promise<void>;
 export const setMainDisplay = (id: number) => swiftSetMainDisplay(id) as Promise<void>;
+export const listAudioOutputs = () => swiftListAudioOutputs() as Promise<AudioOutput[]>;
+export const setDefaultAudioOutput = (id: number) => swiftSetDefaultAudioOutput(id) as Promise<void>;
+export const getBrightness = (display: number) => swiftGetBrightness(display) as Promise<number>;
+export const setBrightness = (display: number, value: number) => swiftSetBrightness(display, value) as Promise<void>;
+
+/** The audio device that belongs to `display`: built-in speakers for the built-in display, otherwise the
+ *  display's own DisplayPort/HDMI device (matched by name first, then by transport). */
+export function audioOutputFor(display: DisplayInfo, outputs: AudioOutput[]): AudioOutput | undefined {
+  if (display.isBuiltin) return outputs.find((o) => o.transport === "bltn");
+  const name = display.name.toLowerCase();
+  return (
+    outputs.find((o) => o.name.toLowerCase() === name) ??
+    outputs.find((o) => o.transport === "dprt" || o.transport === "hdmi")
+  );
+}
 
 export const prefs = () => getPreferenceValues<Preferences>();
 
