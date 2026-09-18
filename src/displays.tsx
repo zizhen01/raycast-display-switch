@@ -5,7 +5,6 @@ import {
   DisplayInfo,
   describeMode,
   listDisplays,
-  mirrorSource,
   resolutionLabel,
   setMainDisplay,
   setMirror,
@@ -15,18 +14,16 @@ import {
 export default function Command() {
   const { data, isLoading, revalidate } = usePromise(listDisplays);
   const displays = data ?? [];
-  const source = mirrorSource(displays);
 
   async function run(title: string, work: () => Promise<void>) {
     const toast = await showToast({ style: Toast.Style.Animated, title });
     try {
       await work();
-      toast.style = Toast.Style.Success;
-      toast.title = "Done";
+      await toast.hide();
       // Give WindowServer a moment to settle before re-reading state.
       setTimeout(revalidate, 800);
     } catch (error) {
-      toast.hide();
+      await toast.hide();
       await showFailureToast(error, { title: "Display change failed" });
     }
   }
@@ -38,15 +35,18 @@ export default function Command() {
           key={d.id}
           display={d}
           all={displays}
-          source={source}
-          onMirror={() =>
-            source &&
+          onMirror={(source) =>
             run(`Mirroring ${d.name} to ${source.name}…`, async () => {
               await setMirror(d.id, source.id);
               await markIntendedMirror(true);
             })
           }
-          onUnmirror={() => run(`Extending ${d.name}…`, () => unmirror(d.id))}
+          onUnmirror={() =>
+            run(`Extending ${d.name}…`, async () => {
+              await unmirror(d.id);
+              await markIntendedMirror(false);
+            })
+          }
           onMakeMain={() => run(`Making ${d.name} the main display…`, () => setMainDisplay(d.id))}
           onRefresh={revalidate}
         />
@@ -59,22 +59,27 @@ export default function Command() {
 function DisplayItem(props: {
   display: DisplayInfo;
   all: DisplayInfo[];
-  source?: DisplayInfo;
-  onMirror: () => void;
+  onMirror: (source: DisplayInfo) => void;
   onUnmirror: () => void;
   onMakeMain: () => void;
   onRefresh: () => void;
 }) {
-  const { display: d, all, source } = props;
-  const mode = describeMode(d, all);
-  const isMirror = d.mirrorsDisplayId !== 0;
-  const canMirror = !!source && source.id !== d.id && !isMirror;
+  const { display: d, all } = props;
+  const copiesAnother = d.mirrorsDisplayId !== 0;
+  const isMirrorSource = d.isMirroring && !copiesAnother;
+
+  // Displays this one could show a copy of. A display that other displays already copy is left
+  // alone: detach it first rather than turning the set inside out in one step.
+  const sources = isMirrorSource ? [] : all.filter((o) => o.id !== d.id && o.id !== d.mirrorsDisplayId);
 
   const accessories: List.Item.Accessory[] = [];
   if (d.isMain) accessories.push({ tag: { value: "Main", color: Color.Blue } });
   if (d.isBuiltin) accessories.push({ tag: "Built-in" });
   accessories.push({
-    tag: { value: mode, color: isMirror ? Color.Orange : d.isMirroring ? Color.Yellow : Color.Green },
+    tag: {
+      value: describeMode(d, all),
+      color: copiesAnother ? Color.Orange : d.isMirroring ? Color.Yellow : Color.Green,
+    },
   });
 
   return (
@@ -85,12 +90,18 @@ function DisplayItem(props: {
       accessories={accessories}
       actions={
         <ActionPanel>
-          <ActionPanel.Section>
-            {canMirror && <Action title={`Mirror ${source.name}`} icon={Icon.Duplicate} onAction={props.onMirror} />}
+          <ActionPanel.Section title={`${d.name} should`}>
+            {sources.map((o) => (
+              <Action key={o.id} title={`Mirror ${o.name}`} icon={Icon.Duplicate} onAction={() => props.onMirror(o)} />
+            ))}
             {d.isMirroring && (
-              <Action title="Stop Mirroring (Extend)" icon={Icon.AppWindowSidebarRight} onAction={props.onUnmirror} />
+              <Action
+                title={isMirrorSource ? "Stop Being Mirrored" : "Stop Mirroring"}
+                icon={Icon.AppWindowSidebarRight}
+                onAction={props.onUnmirror}
+              />
             )}
-            {!d.isMain && !isMirror && (
+            {!d.isMain && !copiesAnother && (
               <Action
                 title="Set as Main Display"
                 icon={Icon.Star}

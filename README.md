@@ -10,8 +10,10 @@ Raycast extension that flips an external display between **extended** and **mirr
 | **Mirror Displays** | no-view | Every display copies the one chosen in *Mirror Optimized For*. No-op if already mirrored. |
 | **Extend Displays** | no-view | Stop mirroring, then put the menu bar back on the preferred main display. No-op if already extended. |
 | **Swap Main Display** | no-view | Move the menu bar to the other display without touching mirroring. |
-| **Manage Displays** | view | Lists every display with mode and resolution. Actions: mirror to a display, stop mirroring, set as main. |
+| **Manage Displays** | view | Lists every display with mode and resolution. Pick a display and the actions read as a sentence: *Mi Monitor should… Mirror Built-in Retina Display*. Either direction works here, whatever the preferences say. |
 | **Display Status** | menu-bar | Icon shows mirrored vs extended; menu has the two states with a check mark plus Swap Main. |
+
+The preferences below steer only the no-view commands and the menu bar. Manage Displays always offers both directions.
 
 Every command reports the resulting state in a HUD, e.g. `Mirroring · optimized for Mi Monitor` or `Extended · Mi Monitor is main`.
 
